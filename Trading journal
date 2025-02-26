@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal de Trading</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+</head>
+<body>
+    <h1>Journal de Trading</h1>
+    <form id="tradeForm">
+        <input type="text" id="asset" placeholder="Actif (ex: XAUUSD)" required>
+        <input type="number" id="entry" placeholder="Prix d'entrée" required>
+        <input type="number" id="exit" placeholder="Prix de sortie" required>
+        <button type="submit">Enregistrer</button>
+    </form>
+    <ul id="tradeList"></ul>
+
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "VOTRE_API_KEY",
+            authDomain: "VOTRE_AUTH_DOMAIN",
+            projectId: "VOTRE_PROJECT_ID",
+            storageBucket: "VOTRE_STORAGE_BUCKET",
+            messagingSenderId: "VOTRE_SENDER_ID",
+            appId: "VOTRE_APP_ID"
+        };
+        
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        document.getElementById('tradeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let asset = document.getElementById('asset').value;
+            let entry = parseFloat(document.getElementById('entry').value);
+            let exit = parseFloat(document.getElementById('exit').value);
+            
+            db.collection('trades').add({ asset, entry, exit })
+              .then(() => alert('Trade enregistré !'))
+              .catch(error => console.error('Erreur :', error));
+        });
+
+        // Afficher les trades enregistrés
+        db.collection('trades').onSnapshot(snapshot => {
+            let tradeList = document.getElementById('tradeList');
+            tradeList.innerHTML = '';
+            snapshot.forEach(doc => {
+                let data = doc.data();
+                let li = document.createElement('li');
+                li.textContent = `${data.asset} - Entrée : ${data.entry}, Sortie : ${data.exit}`;
+                tradeList.appendChild(li);
+            });
+        });
+    </script>
+</body>
+</html>
